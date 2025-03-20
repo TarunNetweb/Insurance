@@ -11,8 +11,19 @@ router = APIRouter()
 
 @router.post("/signup")
 def signup(request: UserRegisterRequest, db: Session = Depends(get_db)):
-    user = register_user(db, request.username, request.email, request.password, request.role)
-    return {"message": "User created successfully", "user_id": user.id}
+    try:
+        user = register_user(
+        db,
+        request.username,
+        request.first_name,
+        request.last_name,
+        request.email,
+        request.phone_number,
+        request.password,
+        request.role) 
+        return {"message": "User created successfully", "user_id": user.id}
+    except Exception as e:
+        return {"error": str(e)}
 
 @router.post("/login")
 def login(request: UserLoginRequest, db: Session = Depends(get_db)):
@@ -25,4 +36,7 @@ def login(request: UserLoginRequest, db: Session = Depends(get_db)):
 @router.get("/admin-only")
 def admin_dashboard(user_data=Depends(require_role("admin"))):
     print(" user_data ", user_data)
-    return {"message": "Welcome Admin!", "user": user_data}
+    try:
+        return {"message": "Welcome Admin!", "user": user_data}
+    except Exception as e:
+        return {"error": str(e)}

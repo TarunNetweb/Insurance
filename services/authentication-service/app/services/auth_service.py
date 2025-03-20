@@ -3,14 +3,25 @@ from models.user import User
 from utils.password_utils import hash_password, verify_password
 from utils.jwt_utils import create_access_token, verify_token
 from fastapi import Depends, HTTPException
-import jwt
-import os
+from datetime import datetime
 
 
-
-def register_user(db: Session, username: str, email: str, password: str, role: str):
+def register_user(
+    db: Session, username: str, first_name: str, last_name: str, 
+    email: str, phone_number: str, password: str, role: str
+):
     hashed_pw = hash_password(password)
-    new_user = User(username=username, email=email, password=hashed_pw, role=role)
+    new_user = User(
+        username=username,
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        phone_number=phone_number,
+        password=hashed_pw,
+        role=role,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow()
+    )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
