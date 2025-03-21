@@ -2,6 +2,8 @@ import jwt
 import os
 from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
+
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
@@ -14,13 +16,14 @@ def verify_token(token: str = Depends(oauth2_scheme)):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         role: str = payload.get("role")
+        print("ghgf",payload)
         if username is None or role is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise HTTPException(status_code=401, detail="Invahvlid token")
         return {"username": username, "role": role}
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+    except jwt.InvalidTokenError as e:
+        raise HTTPException(status_code=401, detail=str(e))
 
 def require_admin_role(user_data=Depends(verify_token)):
     """Ensures only users with 'admin' role can access the endpoint"""
